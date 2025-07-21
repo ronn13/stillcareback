@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+
+{% block title %}Create Appointment - StillCare{% endblock %}
+
+{% block content %}
+<style>
+/* ... existing styles ... */
+</style>
+<!-- Modal for double-booking warning -->
+<div class="modal fade" id="doubleBookingModal" tabindex="-1" aria-labelledby="doubleBookingModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-warning">
+        <h5 class="modal-title" id="doubleBookingModalLabel">Staff Double-Booking Warning</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        The selected staff member already has an appointment during this time. Are you sure you want to assign this task?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="cancelAssign">Cancel</button>
+        <button type="button" class="btn btn-warning" id="confirmAssign">Assign Anyway</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Create New Appointment</h1>
+        <a href="{% url 'appointment_list' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Appointments
+        </a>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Appointment Details</h6>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                {{ form.non_field_errors }}
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.title.id_for_label }}">Title</label>
+                        {{ form.title|add_class:'form-control' }}
+                        <small class="form-text text-muted">Short description of the appointment.</small>
+                        {{ form.title.errors }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.client.id_for_label }}">Client</label>
+                        {{ form.client|add_class:'form-control' }}
+                        {{ form.client.errors }}
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="{{ form.description.id_for_label }}">Description</label>
+                    {{ form.description|add_class:'form-control' }}
+                    <small class="form-text text-muted">Additional details (optional).</small>
+                    {{ form.description.errors }}
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.start_time.id_for_label }}">Start Time</label>
+                        {{ form.start_time }}
+                        <small class="form-text text-muted">Select date and time.</small>
+                        {{ form.start_time.errors }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.end_time.id_for_label }}">End Time</label>
+                        {{ form.end_time }}
+                        <small class="form-text text-muted">Select date and time.</small>
+                        {{ form.end_time.errors }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.status.id_for_label }}">Status</label>
+                        {{ form.status|add_class:'form-control' }}
+                        {{ form.status.errors }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.assigned_staff.id_for_label }}">Assigned Staff</label>
+                        {{ form.assigned_staff|add_class:'form-control' }}
+                        {{ form.assigned_staff.errors }}
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="{{ form.frequency.id_for_label }}">Frequency</label>
+                    {{ form.frequency|add_class:'form-control' }}
+                    <small class="form-text text-muted">How often this appointment repeats (if applicable).</small>
+                    {{ form.frequency.errors }}
+                </div>
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="{% url 'appointment_list' %}" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Create Appointment
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+<script>
+(function() {
+    let allowSubmit = false;
+    const form = document.querySelector('form');
+    const staffField = document.getElementById('id_assigned_staff');
+    const startField = document.getElementById('id_start_time');
+    const endField = document.getElementById('id_end_time');
+    let conflict = false;
+
+    async function checkConflict() {
+        if (!staffField.value || !startField.value || !endField.value) return;
+        const params = new URLSearchParams({
+            staff_id: staffField.value,
+            start_time: new Date(startField.value).toISOString(),
+            end_time: new Date(endField.value).toISOString()
+        });
+        const resp = await fetch('/appointment_management/check_staff_availability/?' + params.toString());
+        const data = await resp.json();
+        conflict = data.conflict;
+        return conflict;
+    }
+
+    function showModal() {
+        const modal = new bootstrap.Modal(document.getElementById('doubleBookingModal'));
+        modal.show();
+    }
+
+    if (form) {
+        form.addEventListener('submit', async function(e) {
+            if (allowSubmit) {
+                allowSubmit = false;
+                return;
+            }
+            await checkConflict();
+            if (conflict) {
+                e.preventDefault();
+                showModal();
+            }
+        });
+    }
+    [staffField, startField, endField].forEach(function(field) {
+        if (field) {
+            field.addEventListener('change', async function() {
+                await checkConflict();
+            });
+        }
+    });
+    document.getElementById('confirmAssign').addEventListener('click', function() {
+        allowSubmit = true;
+        bootstrap.Modal.getInstance(document.getElementById('doubleBookingModal')).hide();
+        form.submit();
+    });
+    document.getElementById('cancelAssign').addEventListener('click', function() {
+        allowSubmit = false;
+    });
+})();
+</script>

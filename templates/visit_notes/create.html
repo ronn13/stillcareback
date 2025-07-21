@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+  <h2>Add Note to Appointment #{{ appointment.id }}</h2>
+  <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    <div class="mb-3">
+      <label for="id_content" class="form-label">Note Content</label>
+      {{ form.content|as_widget(attrs={'class': 'form-control', 'rows': 4}) }}
+      {{ form.content.errors }}
+    </div>
+    <div class="mb-3">
+      <label for="id_document" class="form-label">Document (optional)</label>
+      {{ form.document|as_widget(attrs={'class': 'form-control'}) }}
+      {{ form.document.errors }}
+    </div>
+    <button type="submit" class="btn btn-primary">Save Note</button>
+    <a href="{% url 'appointment_detail' appointment.id %}" class="btn btn-secondary">Cancel</a>
+  </form>
+</div>
+{% endblock %} 

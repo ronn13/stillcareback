@@ -1,0 +1,267 @@
+{% extends "base.html" %}
+{% block title %}{{ appointment.title }} | StillCare{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="display-5 text-primary"><i class="fas fa-calendar me-3"></i>{{ appointment.title }}</h1>
+    <div>
+        <a href="{% url 'appointment_edit' appointment.id %}" class="btn btn-warning">
+            <i class="fas fa-edit"></i> Edit
+        </a>
+        <a href="{% url 'appointment_delete' appointment.id %}" class="btn btn-danger">
+            <i class="fas fa-trash"></i> Delete
+        </a>
+        <a href="{% url 'appointment_list' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Appointments
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <!-- Appointment Details Card -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Appointment Details</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <dl class="row">
+                            <dt class="col-sm-4">Title:</dt>
+                            <dd class="col-sm-8"><strong>{{ appointment.title }}</strong></dd>
+                            
+                            <dt class="col-sm-4">Client:</dt>
+                            <dd class="col-sm-8">
+                                <a href="{% url 'client_detail' appointment.client.id %}">{{ appointment.client.full_name }}</a>
+                            </dd>
+                            
+                            <dt class="col-sm-4">Date:</dt>
+                            <dd class="col-sm-8">{{ appointment.start_time|date:"l, F d, Y" }}</dd>
+                            
+                            <dt class="col-sm-4">Time:</dt>
+                            <dd class="col-sm-8">{{ appointment.start_time|time:"H:i" }} - {{ appointment.end_time|time:"H:i" }}</dd>
+                            
+                            <dt class="col-sm-4">Duration:</dt>
+                            <dd class="col-sm-8">
+                                {% if appointment.actual_start_time and appointment.actual_end_time %}
+                                    {{ appointment.duration_minutes|default:"Calculating..." }} minutes
+                                {% else %}
+                                    {{ appointment.end_time|timeuntil:appointment.start_time }}
+                                {% endif %}
+                            </dd>
+                        </dl>
+                    </div>
+                    <div class="col-md-6">
+                        <dl class="row">
+                            <dt class="col-sm-4">Status:</dt>
+                            <dd class="col-sm-8">
+                                <span class="badge bg-{% if appointment.status == 'scheduled' %}info{% elif appointment.status == 'in_progress' %}warning{% elif appointment.status == 'completed' %}success{% elif appointment.status == 'cancelled' %}danger{% else %}secondary{% endif %}">
+                                    {{ appointment.get_status_display }}
+                                </span>
+                            </dd>
+                            
+                            <dt class="col-sm-4">Assigned Staff:</dt>
+                            <dd class="col-sm-8">{{ appointment.assigned_staff.get_full_name|default:appointment.assigned_staff.username }}</dd>
+                            
+                            <dt class="col-sm-4">Frequency:</dt>
+                            <dd class="col-sm-8">
+                                {% if appointment.frequency %}
+                                    <span class="badge bg-info">{{ appointment.get_frequency_display }}</span>
+                                {% else %}
+                                    <span class="text-muted">One-time</span>
+                                {% endif %}
+                            </dd>
+                            
+                            <dt class="col-sm-4">Created:</dt>
+                            <dd class="col-sm-8">{{ appointment.created_at|date:"M d, Y H:i" }}</dd>
+                        </dl>
+                    </div>
+                </div>
+                
+                {% if appointment.description %}
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <h6>Description:</h6>
+                        <p class="text-muted">{{ appointment.description|linebreaks }}</p>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if appointment.actual_start_time %}
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <h6>Visit Information:</h6>
+                        <dl class="row">
+                            <dt class="col-sm-3">Started:</dt>
+                            <dd class="col-sm-9">{{ appointment.actual_start_time|date:"M d, Y H:i" }}</dd>
+                            {% if appointment.actual_end_time %}
+                            <dt class="col-sm-3">Ended:</dt>
+                            <dd class="col-sm-9">{{ appointment.actual_end_time|date:"M d, Y H:i" }}</dd>
+                            {% endif %}
+                        </dl>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Appointment Notes Card -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-primary">Appointment Notes</h6>
+                <a href="{% url 'note_create' appointment.id %}" class="btn btn-sm btn-success">
+                    <i class="fas fa-plus"></i> Add Note
+                </a>
+            </div>
+            <div class="card-body">
+                {% if notes %}
+                    <ul class="list-group">
+                        {% for note in notes %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <a href="{% url 'note_detail' note.id %}"><strong>{{ note.created_at|date:'M d, Y H:i' }}</strong></a>
+                                    by {{ note.uploaded_by }}
+                                    {% if note.content %}<br>{{ note.content|truncatechars:60 }}{% endif %}
+                                    {% if note.document %}<br><a href="{{ note.document.url }}" target="_blank">Document</a>{% endif %}
+                                    {% if note.image %}<br><img src="{{ note.image.url }}" alt="Note Image" style="max-width:60px;max-height:60px;"/>{% endif %}
+                                </div>
+                                <div>
+                                    <a href="{% url 'note_edit' note.id %}" class="btn btn-sm btn-warning me-1">Edit</a>
+                                    <a href="{% url 'note_delete' note.id %}" class="btn btn-sm btn-danger">Delete</a>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted">No notes for this appointment yet.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Care Checklist Card -->
+        {% if appointment.available_checklist_items %}
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Care Checklist</h6>
+            </div>
+            <div class="card-body">
+                <div class="progress mb-3">
+                    <div class="progress-bar" role="progressbar" style="width: {{ appointment.checklist_completion_percentage }}%">
+                        {{ appointment.checklist_completion_percentage|floatformat:0 }}%
+                    </div>
+                </div>
+                <ul class="list-group">
+                    {% for item in appointment.available_checklist_items %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            {{ item }}
+                            {% if item in appointment.checklist_items %}
+                                <span class="badge bg-success"><i class="fas fa-check"></i> Completed</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Pending</span>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="col-lg-4">
+        <!-- Client Summary Card -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Client Summary</h6>
+            </div>
+            <div class="card-body">
+                <h5>{{ appointment.client.full_name }}</h5>
+                <p class="text-muted mb-2">{{ appointment.client.address }}</p>
+                
+                <div class="mb-3">
+                    <strong>Contact:</strong><br>
+                    <i class="fas fa-phone"></i> {{ appointment.client.phone }}<br>
+                    <i class="fas fa-envelope"></i> {{ appointment.client.email }}
+                </div>
+                
+                <a href="{% url 'client_detail' appointment.client.id %}" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-user"></i> View Full Profile
+                </a>
+            </div>
+        </div>
+
+        <!-- Quick Actions Card -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Quick Actions</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    {% if appointment.status == 'scheduled' %}
+                        <a href="#" class="btn btn-success" onclick="startVisit({{ appointment.id }})">
+                            <i class="fas fa-play"></i> Start Visit
+                        </a>
+                    {% elif appointment.status == 'in_progress' %}
+                        <a href="#" class="btn btn-warning" onclick="endVisit({{ appointment.id }})">
+                            <i class="fas fa-stop"></i> End Visit
+                        </a>
+                    {% endif %}
+                    <a href="{% url 'appointment_edit' appointment.id %}" class="btn btn-warning">
+                        <i class="fas fa-edit"></i> Edit Appointment
+                    </a>
+                    <a href="{% url 'client_detail' appointment.client.id %}" class="btn btn-info">
+                        <i class="fas fa-user"></i> View Client
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function startVisit(appointmentId) {
+    if (confirm('Start the visit for this appointment?')) {
+        fetch(`/appointments/api/staff/appointments/${appointmentId}/start_visit/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                alert(data.message);
+                location.reload();
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error starting visit');
+        });
+    }
+}
+
+function endVisit(appointmentId) {
+    if (confirm('End the visit for this appointment?')) {
+        fetch(`/appointments/api/staff/appointments/${appointmentId}/end_visit/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                alert(data.message);
+                location.reload();
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error ending visit');
+        });
+    }
+}
+</script>
+{% endblock %} 

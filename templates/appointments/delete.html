@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Appointment - StillCare{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-danger">Delete Appointment</h6>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+                        <h4>Are you sure?</h4>
+                        <p class="text-muted">This action cannot be undone. The appointment and all related data will be permanently deleted.</p>
+                    </div>
+
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h6>Appointment Details:</h6>
+                            <dl class="row">
+                                <dt class="col-sm-4">Client:</dt>
+                                <dd class="col-sm-8">{{ appointment.client.full_name }}</dd>
+                                
+                                <dt class="col-sm-4">Date:</dt>
+                                <dd class="col-sm-8">{{ appointment.date|date:"M d, Y" }}</dd>
+                                
+                                <dt class="col-sm-4">Time:</dt>
+                                <dd class="col-sm-8">{{ appointment.start_time|time:"H:i" }} - {{ appointment.end_time|time:"H:i" }}</dd>
+                                
+                                <dt class="col-sm-4">Type:</dt>
+                                <dd class="col-sm-8">{{ appointment.get_appointment_type_display }}</dd>
+                            </dl>
+                        </div>
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-center gap-2">
+                            <a href="{% url 'appointment_detail' appointment.id %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash"></i> Delete Appointment
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

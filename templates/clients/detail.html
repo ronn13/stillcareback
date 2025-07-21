@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% block title %}{{ client.full_name }} | StillCare{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="display-5 text-primary"><i class="fas fa-user me-3"></i>{{ client.full_name }}</h1>
+    <div>
+        <a href="{% url 'client_edit' client.id %}" class="btn btn-warning">
+            <i class="fas fa-edit"></i> Edit
+        </a>
+        <a href="{% url 'client_delete' client.id %}" class="btn btn-danger">
+            <i class="fas fa-trash"></i> Delete
+        </a>
+        <a href="{% url 'client_list' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Clients
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <!-- Client Information -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Client Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <dl class="row">
+                            <dt class="col-sm-4">Name:</dt>
+                            <dd class="col-sm-8"><strong>{{ client.full_name }}</strong></dd>
+                            <dt class="col-sm-4">Email:</dt>
+                            <dd class="col-sm-8">{{ client.email|default:"Not provided" }}</dd>
+                            <dt class="col-sm-4">Phone:</dt>
+                            <dd class="col-sm-8">{{ client.phone|default:"Not provided" }}</dd>
+                        </dl>
+                    </div>
+                    <div class="col-md-6">
+                        <dl class="row">
+                            <dt class="col-sm-4">Created:</dt>
+                            <dd class="col-sm-8">{{ client.created_at|date:"M d, Y" }}</dd>
+                            <dt class="col-sm-4">Updated:</dt>
+                            <dd class="col-sm-8">{{ client.updated_at|date:"M d, Y" }}</dd>
+                            <dt class="col-sm-4">Address:</dt>
+                            <dd class="col-sm-8">{{ client.address|linebreaks }}</dd>
+                        </dl>
+                    </div>
+                </div>
+                
+                {% if client.care_checklist %}
+                <div class="mt-3">
+                    <h6>Care Checklist:</h6>
+                    <ul class="list-unstyled">
+                        {% for item in client.care_checklist %}
+                            <li><i class="fas fa-check text-success me-2"></i>{{ item }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Appointments -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-calendar me-2"></i>Appointments</h5>
+                <a href="{% url 'appointment_create' %}" class="btn btn-sm btn-primary">
+                    <i class="fas fa-plus"></i> Add Appointment
+                </a>
+            </div>
+            <div class="card-body">
+                {% if appointments %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for appointment in appointments %}
+                                <tr>
+                                    <td>{{ appointment.start_time|date:"M d, Y" }}</td>
+                                    <td>{{ appointment.start_time|time:"H:i" }} - {{ appointment.end_time|time:"H:i" }}</td>
+                                    <td>
+                                        <span class="badge bg-{% if appointment.status == 'scheduled' %}info{% elif appointment.status == 'completed' %}success{% elif appointment.status == 'in_progress' %}warning{% else %}secondary{% endif %}">
+                                            {{ appointment.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'appointment_detail' appointment.id %}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted">No appointments found for this client.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <!-- Quick Actions -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-bolt me-2"></i>Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'appointment_create' %}" class="btn btn-primary">
+                        <i class="fas fa-calendar-plus"></i> Create Appointment
+                    </a>
+                    <a href="{% url 'invoice_create' %}" class="btn btn-info">
+                        <i class="fas fa-file-invoice"></i> Create Invoice
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Statistics</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6">
+                        <h4 class="text-primary">{{ appointments.count }}</h4>
+                        <small class="text-muted">Appointments</small>
+                    </div>
+                    <div class="col-6">
+                        <h4 class="text-info">{{ invoices.count }}</h4>
+                        <small class="text-muted">Invoices</small>
+                    </div>
+                </div>
+                <div class="row text-center mt-3">
+                    <div class="col-6">
+                        <h4 class="text-success">{{ appointments.count }}</h4>
+                        <small class="text-muted">Total Visits</small>
+                    </div>
+                    <div class="col-6">
+                        <h4 class="text-warning">{{ client.care_checklist|length }}</h4>
+                        <small class="text-muted">Care Items</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

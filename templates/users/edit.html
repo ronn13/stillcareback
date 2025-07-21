@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% block title %}Edit User | StillCare{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="display-5 text-primary">
+        <i class="fas fa-user-edit me-3"></i>Edit User: {{ user_detail.get_full_name|default:user_detail.username }}
+    </h1>
+    <a href="{% url 'user_list' %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Users
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-user-edit me-2"></i>Edit User Information</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="username" class="form-label">Username *</label>
+                            <input type="text" class="form-control" id="username" name="username" value="{{ user_detail.username }}" required>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" value="{{ user_detail.email|default:'' }}">
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="first_name" class="form-label">First Name</label>
+                            <input type="text" class="form-control" id="first_name" name="first_name" value="{{ user_detail.first_name|default:'' }}">
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="last_name" class="form-label">Last Name</label>
+                            <input type="text" class="form-control" id="last_name" name="last_name" value="{{ user_detail.last_name|default:'' }}">
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="phone" class="form-label">Phone</label>
+                            <input type="tel" class="form-control" id="phone" name="phone" value="{{ user_detail.phone|default:'' }}">
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="role" class="form-label">Role *</label>
+                            <select class="form-select" id="role" name="role" required>
+                                <option value="nurse" {% if user_detail.role == 'nurse' %}selected{% endif %}>Nurse</option>
+                                <option value="admin" {% if user_detail.role == 'admin' %}selected{% endif %}>Admin</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="password1" class="form-label">New Password</label>
+                            <input type="password" class="form-control" id="password1" name="password1" placeholder="Leave blank to keep current password">
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="password2" class="form-label">Confirm New Password</label>
+                            <input type="password" class="form-control" id="password2" name="password2" placeholder="Leave blank to keep current password">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="is_staff_member" name="is_staff_member" {% if user_detail.is_staff_member %}checked{% endif %}>
+                            <label class="form-check-label" for="is_staff_member">
+                                Staff Member
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="is_active" name="is_active" {% if user_detail.is_active %}checked{% endif %}>
+                            <label class="form-check-label" for="is_active">
+                                Active User
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save"></i> Update User
+                        </button>
+                        <a href="{% url 'user_list' %}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Help</h5>
+            </div>
+            <div class="card-body">
+                <h6>Password Change:</h6>
+                <p class="text-muted">Leave password fields blank to keep the current password unchanged.</p>
+                
+                <h6>User Status:</h6>
+                <ul class="list-unstyled">
+                    <li><strong>Active:</strong> User can log in and access the system</li>
+                    <li><strong>Inactive:</strong> User cannot log in</li>
+                </ul>
+                
+                <h6>Staff Member:</h6>
+                <p class="text-muted">Staff members can access the care management features.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

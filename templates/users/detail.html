@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+{% block title %}{{ user_detail.get_full_name|default:user_detail.username }} | StillCare{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="display-5 text-primary">
+        <i class="fas fa-user me-3"></i>{{ user_detail.get_full_name|default:user_detail.username }}
+    </h1>
+    <div>
+        <a href="{% url 'user_edit' user_detail.id %}" class="btn btn-warning">
+            <i class="fas fa-edit"></i> Edit
+        </a>
+        <a href="{% url 'user_delete' user_detail.id %}" class="btn btn-danger">
+            <i class="fas fa-trash"></i> Delete
+        </a>
+        <a href="{% url 'user_list' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Users
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <!-- User Information -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>User Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <dl class="row">
+                            <dt class="col-sm-4">Username:</dt>
+                            <dd class="col-sm-8"><strong>{{ user_detail.username }}</strong></dd>
+                            
+                            <dt class="col-sm-4">Full Name:</dt>
+                            <dd class="col-sm-8">{{ user_detail.get_full_name|default:"Not provided" }}</dd>
+                            
+                            <dt class="col-sm-4">Email:</dt>
+                            <dd class="col-sm-8">{{ user_detail.email|default:"Not provided" }}</dd>
+                            
+                            <dt class="col-sm-4">Phone:</dt>
+                            <dd class="col-sm-8">{{ user_detail.phone|default:"Not provided" }}</dd>
+                        </dl>
+                    </div>
+                    <div class="col-md-6">
+                        <dl class="row">
+                            <dt class="col-sm-4">Role:</dt>
+                            <dd class="col-sm-8">
+                                <span class="badge bg-{% if user_detail.role == 'admin' %}danger{% else %}info{% endif %}">
+                                    {{ user_detail.get_role_display }}
+                                </span>
+                            </dd>
+                            
+                            <dt class="col-sm-4">Status:</dt>
+                            <dd class="col-sm-8">
+                                <span class="badge bg-{% if user_detail.is_active %}success{% else %}secondary{% endif %}">
+                                    {% if user_detail.is_active %}Active{% else %}Inactive{% endif %}
+                                </span>
+                            </dd>
+                            
+                            <dt class="col-sm-4">Staff Member:</dt>
+                            <dd class="col-sm-8">
+                                <span class="badge bg-{% if user_detail.is_staff_member %}primary{% else %}light{% endif %}">
+                                    {% if user_detail.is_staff_member %}Yes{% else %}No{% endif %}
+                                </span>
+                            </dd>
+                            
+                            <dt class="col-sm-4">Joined:</dt>
+                            <dd class="col-sm-8">{{ user_detail.date_joined|date:"M d, Y" }}</dd>
+                            
+                            <dt class="col-sm-4">Last Login:</dt>
+                            <dd class="col-sm-8">{{ user_detail.last_login|date:"M d, Y H:i"|default:"Never" }}</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Assigned Appointments -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-calendar me-2"></i>Assigned Appointments</h5>
+            </div>
+            <div class="card-body">
+                {% if appointments %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Client</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for appointment in appointments %}
+                                <tr>
+                                    <td>{{ appointment.start_time|date:"M d, Y" }}</td>
+                                    <td>{{ appointment.start_time|time:"H:i" }} - {{ appointment.end_time|time:"H:i" }}</td>
+                                    <td>{{ appointment.client.full_name }}</td>
+                                    <td>
+                                        <span class="badge bg-{% if appointment.status == 'scheduled' %}info{% elif appointment.status == 'completed' %}success{% elif appointment.status == 'in_progress' %}warning{% else %}secondary{% endif %}">
+                                            {{ appointment.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'appointment_detail' appointment.id %}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted">No appointments assigned to this user.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <!-- Quick Actions -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-bolt me-2"></i>Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'user_edit' user_detail.id %}" class="btn btn-warning">
+                        <i class="fas fa-edit"></i> Edit User
+                    </a>
+                    <a href="{% url 'appointment_create' %}" class="btn btn-primary">
+                        <i class="fas fa-calendar-plus"></i> Assign Appointment
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Statistics</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6">
+                        <h4 class="text-primary">{{ appointments.count }}</h4>
+                        <small class="text-muted">Total Appointments</small>
+                    </div>
+                    <div class="col-6">
+                        <h4 class="text-success">{{ appointments.count }}</h4>
+                        <small class="text-muted">Active</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

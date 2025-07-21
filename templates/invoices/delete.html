@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Invoice Group - StillCare{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Delete Invoice Group</h1>
+        <a href="{% url 'invoice_list' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Invoice Groups
+        </a>
+    </div>
+
+    <div class="alert alert-danger">
+        <h5><i class="fas fa-exclamation-triangle me-2"></i>Warning</h5>
+        <p>Are you sure you want to delete <strong>{{ invoice.name }}</strong>? This action cannot be undone.</p>
+    </div>
+
+    <div class="card shadow">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Invoice Group Information</h6>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <dl class="row">
+                        <dt class="col-sm-4">Name:</dt>
+                        <dd class="col-sm-8"><strong>{{ invoice.name }}</strong></dd>
+                        <dt class="col-sm-4">Client:</dt>
+                        <dd class="col-sm-8">
+                            {% if invoice.client %}
+                                {{ invoice.client.full_name }}
+                            {% else %}
+                                <span class="text-muted">No client assigned</span>
+                            {% endif %}
+                        </dd>
+                    </dl>
+                </div>
+                <div class="col-md-6">
+                    <dl class="row">
+                        <dt class="col-sm-4">Rate/Hour:</dt>
+                        <dd class="col-sm-8">£{{ invoice.rate_per_hour|floatformat:2 }}</dd>
+                        <dt class="col-sm-4">Created:</dt>
+                        <dd class="col-sm-8">{{ invoice.created_at|date:"M d, Y" }}</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form method="post" class="mt-3">
+        {% csrf_token %}
+        <div class="d-flex justify-content-end gap-2">
+            <a href="{% url 'invoice_list' %}" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-danger">
+                <i class="fas fa-trash"></i> Delete Invoice Group
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %} 
