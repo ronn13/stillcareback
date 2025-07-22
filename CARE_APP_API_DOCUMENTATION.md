@@ -9,13 +9,135 @@ http://localhost:8000/
 ```
 
 ## Authentication
+
 All API endpoints require authentication using Django REST Framework's token authentication or session authentication.
+
+### Authentication Methods
+
+You can authenticate using one of the following methods:
+
+1. **Username & Password**
+2. **6-digit Login Code (PIN)**
+3. **Biometric ID**
+
+### Login Endpoints
+
+#### 1. Login (Multi-method)
+**POST** `/api/auth/login/`
+
+Request body (one of the following):
+```json
+// Username & Password
+{
+  "username": "nurse_jane",
+  "password": "your_password"
+}
+
+// Login Code
+{
+  "login_code": "123456"
+}
+
+// Biometric ID
+{
+  "biometric_id": "biometric-uuid-string"
+}
+```
+
+**Response:**
+```json
+{
+  "token": "<auth_token>",
+  "user_id": 1,
+  "username": "nurse_jane",
+  "first_name": "Jane",
+  "last_name": "Doe",
+  "email": "jane@example.com",
+  "staff": {
+    "id": 1,
+    "username": "nurse_jane",
+    "first_name": "Jane",
+    "last_name": "Doe",
+    "full_name": "Jane Doe",
+    "email": "jane@example.com",
+    "phone": "1234567890",
+    "role": "nurse",
+    "role_display": "Nurse",
+    "is_active": true,
+    "is_staff_member": true,
+    "has_login_code": true,
+    "has_biometric": true
+  }
+}
+```
+
+#### 2. Login with Code
+**POST** `/api/auth/login/code/`
+
+Request body:
+```json
+{
+  "login_code": "123456"
+}
+```
+
+**Response:**
+```json
+{
+  "token": "<auth_token>",
+  "user_id": 1,
+  "username": "nurse_jane",
+  "first_name": "Jane",
+  "last_name": "Doe",
+  "email": "jane@example.com",
+  "staff": { ... }
+}
+```
+
+#### 3. Login with Biometric
+**POST** `/api/auth/login/biometric/`
+
+Request body:
+```json
+{
+  "biometric_id": "biometric-uuid-string"
+}
+```
+
+**Response:**
+```json
+{
+  "token": "<auth_token>",
+  "user_id": 1,
+  "username": "nurse_jane",
+  "first_name": "Jane",
+  "last_name": "Doe",
+  "email": "jane@example.com",
+  "staff": { ... }
+}
+```
+
+### Error Responses
+- If the credentials or code are invalid, or the user is not a staff member, you will receive:
+```json
+{
+  "error": "Invalid username or password, or user is not a staff member"
+}
+```
+- For login code:
+```json
+{
+  "error": "Invalid login code or user is not a staff member"
+}
+```
 
 ### Headers
 ```
 Authorization: Token <your_token>
 Content-Type: application/json
 ```
+
+---
 
 ## API Endpoints
 
