@@ -344,6 +344,70 @@ Updates an existing appointment.
 
 Deletes an appointment.
 
+#### Get Appointment Details
+**GET** `/appointments/api/staff/appointments/{id}/details/`
+
+Returns all details for a single appointment, including:
+- title, description, start time, end time, status
+- full linked client details (nested)
+- all notes for that appointment (with content, document, uploaded_by, timestamps, etc.)
+
+**Response:**
+```json
+{
+  "id": 1,
+  "title": "Morning Care Visit",
+  "description": "Daily morning care routine",
+  "start_time": "2024-01-15T09:00:00Z",
+  "end_time": "2024-01-15T10:00:00Z",
+  "status": "scheduled",
+  "client": {
+    "id": 1,
+    "first_name": "John",
+    "last_name": "Smith",
+    "email": "john.smith@example.com",
+    "phone": "1234567890",
+    "address": "123 Main St",
+    "care_checklist": ["medication", "hygiene"],
+    "invoice_group": null,
+    "full_name": "John Smith",
+    "full_address": "123 Main St",
+    "created_at": "2024-01-01T08:00:00Z",
+    "updated_at": "2024-01-10T08:00:00Z"
+  },
+  "frequency": "daily",
+  "assigned_staff": 2,
+  "actual_start_time": null,
+  "actual_end_time": null,
+  "checklist_items": [],
+  "duration_minutes": null,
+  "available_checklist_items": ["medication", "hygiene"],
+  "checklist_completion_percentage": 0.0,
+  "created_at": "2024-01-15T08:00:00Z",
+  "updated_at": "2024-01-15T08:00:00Z",
+  "notes": [
+    {
+      "id": 1,
+      "content": "Checked blood pressure.",
+      "document": null,
+      "uploaded_by": 2,
+      "uploaded_by_username": "nurse_jane",
+      "created_at": "2024-01-15T09:10:00Z",
+      "updated_at": "2024-01-15T09:10:00Z"
+    },
+    {
+      "id": 2,
+      "content": "Administered medication.",
+      "document": null,
+      "uploaded_by": 2,
+      "uploaded_by_username": "nurse_jane",
+      "created_at": "2024-01-15T09:30:00Z",
+      "updated_at": "2024-01-15T09:30:00Z"
+    }
+  ]
+}
+```
+
 ### 3. Seizures
 
 #### Get All Seizures

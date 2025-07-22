@@ -3,6 +3,8 @@ from .models import Appointment, Seizure, Incident, Medication, BodyMap
 from client_management.models import Client
 from client_management.serializers import ClientSerializer
 
+from visit_notes.serializers import NoteSerializer
+
 class AppointmentSerializer(serializers.ModelSerializer):
     client_name = serializers.ReadOnlyField(source='client.full_name')
     client_location = serializers.ReadOnlyField(source='client.full_address')
@@ -164,3 +166,18 @@ class BodyMapSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Photography consent is required if photos were taken.")
         
         return data
+
+
+class AppointmentDetailSerializer(serializers.ModelSerializer):
+    client = ClientSerializer(read_only=True)
+    notes = NoteSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Appointment
+        fields = [
+            'id', 'title', 'description', 'start_time', 'end_time', 'status',
+            'client', 'frequency', 'assigned_staff', 'actual_start_time', 'actual_end_time',
+            'checklist_items', 'duration_minutes', 'available_checklist_items',
+            'checklist_completion_percentage', 'created_at', 'updated_at', 'notes'
+        ]
+        read_only_fields = ['id', 'created_at', 'updated_at', 'notes']

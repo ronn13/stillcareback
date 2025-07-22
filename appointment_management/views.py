@@ -199,6 +199,14 @@ class StaffAppointmentViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
+    @action(detail=True, methods=['get'])
+    def details(self, request, pk=None):
+        """Get all details for a single appointment, including client and notes"""
+        appointment = self.get_object()
+        from .serializers import AppointmentDetailSerializer
+        serializer = AppointmentDetailSerializer(appointment)
+        return Response(serializer.data)
+
 
 class SeizureViewSet(viewsets.ModelViewSet):
     """
