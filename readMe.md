@@ -50,7 +50,6 @@ Username: test_user
 Login Code: 123456
 
 TODO
-1 - allow biometric login. login with code for the 1st time.
 2 - home screen only has appointments. client name. 
 3 - appointments details. add note to any appointment button at any status
 4 - client info tab. care plan document attachment viewable. location.

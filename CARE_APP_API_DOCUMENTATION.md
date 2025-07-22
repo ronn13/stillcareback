@@ -235,6 +235,38 @@ Returns the next 10 upcoming appointments.
 
 Returns currently in-progress appointments.
 
+#### Get This Week's Appointments
+**GET** `/appointments/api/staff/appointments/week/`
+
+Returns all appointments for the current week (Monday–Sunday) assigned to the authenticated staff member.
+
+**Response:**
+```json
+[
+  {
+    "id": 1,
+    "title": "Morning Care Visit",
+    "description": "Daily morning care routine",
+    "start_time": "2024-01-15T09:00:00Z",
+    "end_time": "2024-01-15T10:00:00Z",
+    "status": "scheduled",
+    "client": 1,
+    "client_name": "John Smith",
+    "frequency": "daily",
+    "assigned_staff": 1,
+    "assigned_staff_name": "nurse_jane",
+    "actual_start_time": null,
+    "actual_end_time": null,
+    "checklist_items": [],
+    "duration_minutes": null,
+    "available_checklist_items": ["medication", "hygiene", "breakfast"],
+    "checklist_completion_percentage": 0.0,
+    "created_at": "2024-01-15T08:00:00Z",
+    "updated_at": "2024-01-15T08:00:00Z"
+  }
+]
+```
+
 #### Start Visit
 **POST** `/appointments/api/staff/appointments/{id}/start_visit/`
 

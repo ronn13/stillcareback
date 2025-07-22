@@ -184,6 +184,21 @@ class StaffAppointmentViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
+    @action(detail=False, methods=['get'])
+    def week(self, request):
+        """Get this week's appointments for the staff member"""
+        today = timezone.now().date()
+        # Start of week (Monday)
+        start_of_week = today - timedelta(days=today.weekday())
+        # End of week (Sunday)
+        end_of_week = start_of_week + timedelta(days=6)
+        queryset = self.get_queryset().filter(
+            start_time__date__gte=start_of_week,
+            start_time__date__lte=end_of_week
+        ).order_by('start_time')
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
 
 class SeizureViewSet(viewsets.ModelViewSet):
     """
