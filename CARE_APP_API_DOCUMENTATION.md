@@ -1209,3 +1209,79 @@ fetch('/appointments/api/staff/incidents/', {
    - `recent` for incidents
 
 10. **Error Handling**: Always check HTTP status codes and handle errors appropriately in your application. 
+
+---
+
+## Notes API
+
+The following endpoints allow you to view and add notes linked to appointments. All endpoints require authentication.
+
+### List Notes
+**GET** `/api/notes/`
+
+Returns all notes (optionally filter by appointment).
+
+**Query Parameters:**
+- `appointment_id` (optional): Only return notes for the given appointment.
+
+**Example:**
+`GET /api/notes/?appointment_id=1`
+
+**Response:**
+```json
+[
+  {
+    "id": 1,
+    "content": "Checked blood pressure.",
+    "document": "/media/visit_notes/documents/dummy1.jpg",
+    "uploaded_by": 2,
+    "uploaded_by_username": "nurse_jane",
+    "created_at": "2024-01-15T09:10:00Z",
+    "updated_at": "2024-01-15T09:10:00Z"
+  }
+]
+```
+
+### Retrieve a Note
+**GET** `/api/notes/{id}/`
+
+Returns details for a single note.
+
+### Create a Note
+**POST** `/api/notes/`
+
+To create a note, send a `multipart/form-data` request (for file upload support):
+
+**Request Body:**
+- `appointment` (integer, required): The appointment ID to link the note to
+- `content` (string, optional): The note content
+- `document` (file, optional): An image or document to attach
+
+**Example using curl:**
+```sh
+curl -X POST http://localhost:8000/api/notes/ \
+  -H "Authorization: Token <your_token>" \
+  -F "appointment=1" \
+  -F "content=This is a new note" \
+  -F "document=@/path/to/image.jpg"
+```
+
+**Response:**
+```json
+{
+  "id": 2,
+  "content": "This is a new note",
+  "document": "/media/visit_notes/documents/image.jpg",
+  "uploaded_by": 2,
+  "uploaded_by_username": "nurse_jane",
+  "created_at": "2024-01-15T10:00:00Z",
+  "updated_at": "2024-01-15T10:00:00Z"
+}
+```
+
+### List Notes for an Appointment
+**GET** `/api/notes/by_appointment/?appointment_id=1`
+
+Returns all notes for the specified appointment.
+
+--- 

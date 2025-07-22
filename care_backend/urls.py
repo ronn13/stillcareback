@@ -60,7 +60,7 @@ urlpatterns = [
     path('api/', include('client_management.urls')),
     path('appointments/', include('appointment_management.urls')),
     path('api/', include('invoice_group.urls')),
-    path('visit-notes/', include('visit_notes.urls')),
+    path('api/notes/', include('visit_notes.urls')),
 ]
 
 # Add static files serving in development
