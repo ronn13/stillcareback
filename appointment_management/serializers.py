@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Appointment, Seizure, Incident, Medication, BodyMap
+from .models import Appointment, Seizure, Incident, Medication, BodyMap, VisitLocationLog
 from client_management.models import Client
 from client_management.serializers import ClientSerializer
 
@@ -181,3 +181,11 @@ class AppointmentDetailSerializer(serializers.ModelSerializer):
             'checklist_completion_percentage', 'created_at', 'updated_at', 'notes'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at', 'notes']
+
+
+class VisitLocationLogSerializer(serializers.ModelSerializer):
+    log_type_display = serializers.CharField(source='get_log_type_display', read_only=True)
+    class Meta:
+        model = VisitLocationLog
+        fields = ['id', 'appointment', 'log_type', 'log_type_display', 'latitude', 'longitude', 'timestamp', 'distance_from_client']
+        read_only_fields = ['id', 'timestamp', 'distance_from_client', 'log_type_display']

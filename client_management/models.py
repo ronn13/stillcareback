@@ -25,6 +25,9 @@ class Client(models.Model):
     phone = models.CharField(max_length=20, blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
     
+    latitude = models.FloatField(blank=True, null=True, help_text="Latitude of the client's residence")
+    longitude = models.FloatField(blank=True, null=True, help_text="Longitude of the client's residence")
+
     # Client care checklist
     care_checklist = models.JSONField(
         default=list,

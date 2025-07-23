@@ -1285,3 +1285,85 @@ curl -X POST http://localhost:8000/api/notes/ \
 Returns all notes for the specified appointment.
 
 --- 
+
+#### Log Device Location for a Visit
+**POST** `/appointments/api/staff/appointments/{id}/log_location/`
+
+Logs the device location for a visit (at start, end, or when deviating >50m from the client address).
+
+**Request Body:**
+- `log_type`: One of `start`, `end`, or `deviation`
+- `latitude`: Device latitude (float)
+- `longitude`: Device longitude (float)
+
+**Example:**
+```json
+{
+  "log_type": "start",
+  "latitude": 51.5074,
+  "longitude": -0.1278
+}
+```
+
+**Response:**
+```json
+{
+  "id": 1,
+  "appointment": 1,
+  "log_type": "start",
+  "log_type_display": "Start",
+  "latitude": 51.5074,
+  "longitude": -0.1278,
+  "timestamp": "2024-01-15T09:00:00Z",
+  "distance_from_client": 12.3
+}
+```
+
+- The `distance_from_client` is calculated using the Haversine formula between the device location and the client's residence.
+- If the distance is greater than 50 meters and the visit is in progress, the app should log a `deviation`.
+
+#### Retrieve All Location Logs for a Visit
+**GET** `/appointments/api/staff/appointments/{id}/location_logs/`
+
+Returns all location logs for the specified visit.
+
+**Response:**
+```json
+[
+  {
+    "id": 1,
+    "appointment": 1,
+    "log_type": "start",
+    "log_type_display": "Start",
+    "latitude": 51.5074,
+    "longitude": -0.1278,
+    "timestamp": "2024-01-15T09:00:00Z",
+    "distance_from_client": 12.3
+  },
+  {
+    "id": 2,
+    "appointment": 1,
+    "log_type": "deviation",
+    "log_type_display": "Deviation",
+    "latitude": 51.5080,
+    "longitude": -0.1285,
+    "timestamp": "2024-01-15T09:30:00Z",
+    "distance_from_client": 75.2
+  },
+  {
+    "id": 3,
+    "appointment": 1,
+    "log_type": "end",
+    "log_type_display": "End",
+    "latitude": 51.5075,
+    "longitude": -0.1279,
+    "timestamp": "2024-01-15T10:00:00Z",
+    "distance_from_client": 10.1
+  }
+]
+```
+
+**Usage Notes:**
+- The app should log a location at the start and end of every visit.
+- If the device moves more than 50 meters from the client residence between start and end, log a `deviation`.
+- The backend calculates and stores the distance for each log. 

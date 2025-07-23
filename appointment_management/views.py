@@ -16,12 +16,12 @@ from django.utils import timezone
 from datetime import datetime, timedelta
 import json
 from django.contrib.auth import get_user_model
-
-from .models import Appointment, Seizure, Incident, Medication, BodyMap
+import math
+from .models import Appointment, Seizure, Incident, Medication, BodyMap, VisitLocationLog
 from .forms import AppointmentForm, SeizureForm, IncidentForm, MedicationForm, BodyMapForm
 from .serializers import (
     AppointmentSerializer, SeizureSerializer, IncidentSerializer, 
-    MedicationSerializer, BodyMapSerializer
+    MedicationSerializer, BodyMapSerializer, VisitLocationLogSerializer
 )
 
 User = get_user_model()
@@ -205,6 +205,53 @@ class StaffAppointmentViewSet(viewsets.ModelViewSet):
         appointment = self.get_object()
         from .serializers import AppointmentDetailSerializer
         serializer = AppointmentDetailSerializer(appointment)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['post'])
+    def log_location(self, request, pk=None):
+        """Log device location for visit (start, end, or deviation)"""
+        appointment = self.get_object()
+        log_type = request.data.get('log_type')
+        latitude = request.data.get('latitude')
+        longitude = request.data.get('longitude')
+        if not all([log_type, latitude, longitude]):
+            return Response({'error': 'log_type, latitude, and longitude are required'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            latitude = float(latitude)
+            longitude = float(longitude)
+        except ValueError:
+            return Response({'error': 'latitude and longitude must be numbers'}, status=status.HTTP_400_BAD_REQUEST)
+        # Get client lat/lon
+        client = appointment.client
+        if not client.latitude or not client.longitude:
+            return Response({'error': 'Client does not have latitude/longitude set'}, status=status.HTTP_400_BAD_REQUEST)
+        # Haversine formula
+        def haversine(lat1, lon1, lat2, lon2):
+            R = 6371000  # meters
+            phi1 = math.radians(lat1)
+            phi2 = math.radians(lat2)
+            dphi = math.radians(lat2 - lat1)
+            dlambda = math.radians(lon2 - lon1)
+            a = math.sin(dphi/2)**2 + math.cos(phi1)*math.cos(phi2)*math.sin(dlambda/2)**2
+            c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
+            return R * c
+        distance = haversine(client.latitude, client.longitude, latitude, longitude)
+        log = VisitLocationLog.objects.create(
+            appointment=appointment,
+            log_type=log_type,
+            latitude=latitude,
+            longitude=longitude,
+            distance_from_client=distance
+        )
+        serializer = VisitLocationLogSerializer(log)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=['get'])
+    def location_logs(self, request, pk=None):
+        """Get all location logs for a visit"""
+        appointment = self.get_object()
+        logs = appointment.location_logs.all().order_by('timestamp')
+        serializer = VisitLocationLogSerializer(logs, many=True)
         return Response(serializer.data)
 
 

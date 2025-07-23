@@ -50,11 +50,16 @@ Username: test_user
 Login Code: 123456
 
 TODO
-3 - appointments details. add note to any appointment button at any status
 4 - client info tab. care plan document attachment viewable. location.
 5 - Add notes as a must before appointment closing
-6 - Colours
+6 - Colours. change start button
 7 - Start and End appointment activity. device location should be close to client location. send alert if either activity happens far from client premises.
+8 - Test various action notifications for permissions
+9 - change maroon background to white
+10 - test notifications
+11 - log device location at visit start time and visit end time. create functionality to log any time device location is more than 50m away from the client residence between visit start and end times. create a calculation for the distance between device location and the client address based on device location at visit start and end times
+
+
 
 TO BE DISCUSSED
 - mobility support. 

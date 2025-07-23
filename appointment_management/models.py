@@ -539,3 +539,23 @@ class BodyMap(models.Model):
             raise ValidationError("Consent type must be specified if consent was given.")
         if self.photos_taken and not self.photography_consent:
             raise ValidationError("Photography consent is required if photos were taken.")
+
+
+class VisitLocationLog(models.Model):
+    LOG_TYPE_CHOICES = [
+        ('start', 'Start'),
+        ('end', 'End'),
+        ('deviation', 'Deviation'),
+    ]
+    appointment = models.ForeignKey(Appointment, on_delete=models.CASCADE, related_name='location_logs')
+    log_type = models.CharField(max_length=10, choices=LOG_TYPE_CHOICES)
+    latitude = models.FloatField()
+    longitude = models.FloatField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+    distance_from_client = models.FloatField(help_text='Distance from client residence in meters')
+
+    class Meta:
+        ordering = ['timestamp']
+
+    def __str__(self):
+        return f"{self.get_log_type_display()} log for {self.appointment} at {self.timestamp}"
