@@ -269,6 +269,15 @@ class StaffAppointmentViewSet(viewsets.ModelViewSet):
         serializer = VisitLocationLogSerializer(logs, many=True)
         return Response(serializer.data)
 
+    @action(detail=True, methods=['get'])
+    def seizures(self, request, pk=None):
+        """List all seizures for this appointment, including duration."""
+        appointment = self.get_object()
+        seizures = appointment.seizures.all().order_by('start_time')
+        from .serializers import SeizureSerializer
+        serializer = SeizureSerializer(seizures, many=True)
+        return Response(serializer.data)
+
 
 class SeizureViewSet(viewsets.ModelViewSet):
     """

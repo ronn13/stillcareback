@@ -487,13 +487,36 @@ Returns all seizures for appointments assigned to the staff member.
 #### Create Seizure
 **POST** `/appointments/api/staff/seizures/`
 
-Creates a new seizure record.
+Creates a new seizure record. You can provide both `start_time` and `end_time` in a single API call.
 
 **Request:**
 ```json
 {
   "appointment": 1,
-  "start_time": "2024-01-15T09:30:00Z"
+  "start_time": "2024-01-15T09:30:00Z",
+  "end_time": "2024-01-15T09:35:00Z"
+}
+```
+
+**Response (Success):**
+```json
+{
+  "id": 1,
+  "appointment": 1,
+  "appointment_title": "Morning Care Visit",
+  "client_name": "John Smith",
+  "start_time": "2024-01-15T09:30:00Z",
+  "end_time": "2024-01-15T09:35:00Z",
+  "duration_minutes": 5,
+  "created_at": "2024-01-15T09:30:00Z",
+  "updated_at": "2024-01-15T09:35:00Z"
+}
+```
+
+**Response (Error - End Before Start):**
+```json
+{
+  "non_field_errors": ["End time must be after start time."]
 }
 ```
 
