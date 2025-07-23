@@ -92,7 +92,7 @@ class StaffAppointmentViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'])
     def start_visit(self, request, pk=None):
-        """Start a visit by setting actual_start_time. Only allowed if appointment is today."""
+        """Start a visit by setting actual_start_time. Only allowed if appointment is today and no other visit is in progress for this staff member."""
         appointment = self.get_object()
         today = timezone.now().date()
         if appointment.start_time.date() != today:
@@ -105,6 +105,19 @@ class StaffAppointmentViewSet(viewsets.ModelViewSet):
                 {'error': 'This visit has already been started. You cannot start it again.'}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
+        # Check for other in-progress visits for this staff member
+        staff = appointment.assigned_staff
+        in_progress = Appointment.objects.filter(
+            assigned_staff=staff,
+            status='in_progress',
+            actual_start_time__isnull=False,
+            actual_end_time__isnull=True
+        ).exclude(id=appointment.id)
+        if in_progress.exists():
+            return Response(
+                {'error': 'You cannot start a new visit while another visit is in progress. Please end your current visit first.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         appointment.actual_start_time = timezone.now()
         appointment.status = 'in_progress'
         appointment.save()
@@ -115,25 +128,21 @@ class StaffAppointmentViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'])
     def end_visit(self, request, pk=None):
-        """End a visit by setting actual_end_time"""
+        """End a visit by setting actual_end_time. Only allowed if visit is in progress and not already ended."""
         appointment = self.get_object()
-        
         if not appointment.actual_start_time:
             return Response(
-                {'error': 'Visit has not been started'}, 
+                {'error': 'You cannot end this visit because it has not been started yet. Please start the visit first.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
         if appointment.actual_end_time:
             return Response(
-                {'error': 'Visit has already been ended'}, 
+                {'error': 'This visit has already been ended. You cannot end it again.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
         appointment.actual_end_time = timezone.now()
         appointment.status = 'completed'
         appointment.save()
-        
         return Response({
             'message': 'Visit ended successfully',
             'actual_end_time': appointment.actual_end_time,
@@ -142,13 +151,16 @@ class StaffAppointmentViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'])
     def update_checklist(self, request, pk=None):
-        """Update checklist items for an appointment"""
+        """Update checklist items for an appointment."""
         appointment = self.get_object()
         checklist_items = request.data.get('checklist_items', [])
-        
+        if not isinstance(checklist_items, list):
+            return Response(
+                {'error': 'Checklist items must be provided as a list.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         appointment.checklist_items = checklist_items
         appointment.save()
-        
         return Response({
             'message': 'Checklist updated successfully',
             'checklist_items': appointment.checklist_items,
@@ -217,18 +229,18 @@ class StaffAppointmentViewSet(viewsets.ModelViewSet):
         log_type = request.data.get('log_type')
         latitude = request.data.get('latitude')
         longitude = request.data.get('longitude')
-        if not all([log_type, latitude, longitude]):
-            return Response({'error': 'log_type, latitude, and longitude are required'}, status=status.HTTP_400_BAD_REQUEST)
+        if not log_type:
+            return Response({'error': 'You must specify the type of location log: start, end, or deviation.'}, status=status.HTTP_400_BAD_REQUEST)
+        if not latitude or not longitude:
+            return Response({'error': 'You must provide both latitude and longitude for the device location.'}, status=status.HTTP_400_BAD_REQUEST)
         try:
             latitude = float(latitude)
             longitude = float(longitude)
         except ValueError:
-            return Response({'error': 'latitude and longitude must be numbers'}, status=status.HTTP_400_BAD_REQUEST)
-        # Get client lat/lon
+            return Response({'error': 'Latitude and longitude must be valid numbers.'}, status=status.HTTP_400_BAD_REQUEST)
         client = appointment.client
         if not client.latitude or not client.longitude:
-            return Response({'error': 'Client does not have latitude/longitude set'}, status=status.HTTP_400_BAD_REQUEST)
-        # Haversine formula
+            return Response({'error': 'The client does not have a valid location set. Please contact your administrator.'}, status=status.HTTP_400_BAD_REQUEST)
         def haversine(lat1, lon1, lat2, lon2):
             R = 6371000  # meters
             phi1 = math.radians(lat1)

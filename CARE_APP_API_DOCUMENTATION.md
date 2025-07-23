@@ -270,7 +270,7 @@ Returns all appointments for the current week (Monday–Sunday) assigned to the 
 #### Start Visit
 **POST** `/appointments/api/staff/appointments/{id}/start_visit/`
 
-Starts a visit by setting the actual start time. **You can only start a visit on the day it is scheduled.**
+Starts a visit by setting the actual start time. **You can only start a visit on the day it is scheduled, and you cannot start a new visit if you already have another visit in progress.**
 
 **Request Body:**
 - (empty)
@@ -297,15 +297,26 @@ Starts a visit by setting the actual start time. **You can only start a visit on
 }
 ```
 
+**Response (Error - Another Visit In Progress):**
+```json
+{
+  "error": "You cannot start a new visit while another visit is in progress. Please end your current visit first."
+}
+```
+
 - Only the assigned staff member can start a visit.
 - The visit must be scheduled for today and not already started.
+- A staff member can only have one visit in progress at a time.
 
 #### End Visit
 **POST** `/appointments/api/staff/appointments/{id}/end_visit/`
 
-Ends a visit by setting the actual end time.
+Ends a visit by setting the actual end time. **You can only end a visit that has been started and not already ended.**
 
-**Response:**
+**Request Body:**
+- (empty)
+
+**Response (Success):**
 ```json
 {
   "message": "Visit ended successfully",
@@ -314,24 +325,45 @@ Ends a visit by setting the actual end time.
 }
 ```
 
+**Response (Error - Not Started):**
+```json
+{
+  "error": "You cannot end this visit because it has not been started yet. Please start the visit first."
+}
+```
+
+**Response (Error - Already Ended):**
+```json
+{
+  "error": "This visit has already been ended. You cannot end it again."
+}
+```
+
 #### Update Checklist
 **POST** `/appointments/api/staff/appointments/{id}/update_checklist/`
 
 Updates checklist items for an appointment.
 
-**Request:**
+**Request Body:**
 ```json
 {
   "checklist_items": ["medication", "hygiene", "breakfast"]
 }
 ```
 
-**Response:**
+**Response (Success):**
 ```json
 {
   "message": "Checklist updated successfully",
   "checklist_items": ["medication", "hygiene", "breakfast"],
   "completion_percentage": 100.0
+}
+```
+
+**Response (Error - Not a List):**
+```json
+{
+  "error": "Checklist items must be provided as a list."
 }
 ```
 
@@ -1316,16 +1348,7 @@ Logs the device location for a visit (at start, end, or when deviating >50m from
 - `latitude`: Device latitude (float)
 - `longitude`: Device longitude (float)
 
-**Example:**
-```json
-{
-  "log_type": "start",
-  "latitude": 51.5074,
-  "longitude": -0.1278
-}
-```
-
-**Response:**
+**Response (Success):**
 ```json
 {
   "id": 1,
@@ -1339,8 +1362,33 @@ Logs the device location for a visit (at start, end, or when deviating >50m from
 }
 ```
 
-- The `distance_from_client` is calculated using the Haversine formula between the device location and the client's residence.
-- If the distance is greater than 50 meters and the visit is in progress, the app should log a `deviation`.
+**Response (Error - Missing log_type):**
+```json
+{
+  "error": "You must specify the type of location log: start, end, or deviation."
+}
+```
+
+**Response (Error - Missing lat/lon):**
+```json
+{
+  "error": "You must provide both latitude and longitude for the device location."
+}
+```
+
+**Response (Error - Invalid lat/lon):**
+```json
+{
+  "error": "Latitude and longitude must be valid numbers."
+}
+```
+
+**Response (Error - Client location not set):**
+```json
+{
+  "error": "The client does not have a valid location set. Please contact your administrator."
+}
+```
 
 #### Retrieve All Location Logs for a Visit
 **GET** `/appointments/api/staff/appointments/{id}/location_logs/`
