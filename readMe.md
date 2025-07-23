@@ -53,13 +53,17 @@ TODO
 4 - client info tab. care plan document attachment viewable. location.
 5 - Add notes as a must before appointment closing
 6 - Colours. change start button
-7 - Start and End appointment activity. device location should be close to client location. send alert if either activity happens far from client premises.
-8 - Test various action notifications for permissions
-9 - change maroon background to white
-10 - test notifications
-11 - log device location at visit start time and visit end time. create functionality to log any time device location is more than 50m away from the client residence between visit start and end times. create a calculation for the distance between device location and the client address based on device location at visit start and end times
 
-
+Area	Suggestion/Improvement
+Login	Add “Forgot PIN?”, improve biometric error feedback
+Dashboard	Highlight current selection, use gold accent for headers
+Appointment Details	Gold accent for section titles, attachment download
+Visit Location	UI warning for deviation, show location logs
+Checklist	Gold accent for 100% complete, sticky save button
+Permissions	Fallback/help for denied permissions
+Error Handling	Snackbars/banners, retry options
+Accessibility	Labels, contrast, screen reader support
+UI Polish	Gold dividers, active tab highlights
 
 TO BE DISCUSSED
 - mobility support. 

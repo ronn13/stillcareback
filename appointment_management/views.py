@@ -92,19 +92,22 @@ class StaffAppointmentViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'])
     def start_visit(self, request, pk=None):
-        """Start a visit by setting actual_start_time"""
+        """Start a visit by setting actual_start_time. Only allowed if appointment is today."""
         appointment = self.get_object()
-        
-        if appointment.actual_start_time:
+        today = timezone.now().date()
+        if appointment.start_time.date() != today:
             return Response(
-                {'error': 'Visit has already been started'}, 
+                {'error': 'You can only start a visit on the day it is scheduled. Please try again on the correct date.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+        if appointment.actual_start_time:
+            return Response(
+                {'error': 'This visit has already been started. You cannot start it again.'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
         appointment.actual_start_time = timezone.now()
         appointment.status = 'in_progress'
         appointment.save()
-        
         return Response({
             'message': 'Visit started successfully',
             'actual_start_time': appointment.actual_start_time

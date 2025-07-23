@@ -270,15 +270,35 @@ Returns all appointments for the current week (Monday–Sunday) assigned to the 
 #### Start Visit
 **POST** `/appointments/api/staff/appointments/{id}/start_visit/`
 
-Starts a visit by setting the actual start time.
+Starts a visit by setting the actual start time. **You can only start a visit on the day it is scheduled.**
 
-**Response:**
+**Request Body:**
+- (empty)
+
+**Response (Success):**
 ```json
 {
   "message": "Visit started successfully",
   "actual_start_time": "2024-01-15T09:05:00Z"
 }
 ```
+
+**Response (Error - Wrong Day):**
+```json
+{
+  "error": "You can only start a visit on the day it is scheduled. Please try again on the correct date."
+}
+```
+
+**Response (Error - Already Started):**
+```json
+{
+  "error": "This visit has already been started. You cannot start it again."
+}
+```
+
+- Only the assigned staff member can start a visit.
+- The visit must be scheduled for today and not already started.
 
 #### End Visit
 **POST** `/appointments/api/staff/appointments/{id}/end_visit/`
