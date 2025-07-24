@@ -181,7 +181,7 @@ REST_FRAMEWORK = {
 }
 
 # CORS settings
-CORS_ALLOWED_ORIGINS = os.environ.get('CORS_ALLOWED_ORIGINS', 'http://localhost:3000,http://127.0.0.1:3000,http://localhost:8081').split(',')
+CORS_ALLOWED_ORIGINS = os.environ.get('CORS_ALLOWED_ORIGINS', 'http://localhost:3000,http://127.0.0.1:3000,http://localhost:8081,https://web-production-83ebd.up.railway.app').split(',')
 
 CORS_ALLOW_CREDENTIALS = True
 
