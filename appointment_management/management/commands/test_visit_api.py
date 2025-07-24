@@ -179,7 +179,7 @@ class Command(BaseCommand):
             if response.status_code == 200:
                 self.stdout.write('✓ End seizure successful')
                 data = response.json()
-                self.stdout.write(f'  - Duration: {data["duration_minutes"]} minutes')
+                self.stdout.write(f'  - Duration: {data["duration_seconds"]} seconds')
             else:
                 self.stdout.write(self.style.ERROR(f'✗ End seizure failed: {response.status_code}'))
         else:

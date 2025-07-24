@@ -477,7 +477,7 @@ Returns all seizures for appointments assigned to the staff member.
     "client_name": "John Smith",
     "start_time": "2024-01-15T09:30:00Z",
     "end_time": "2024-01-15T09:35:00Z",
-    "duration_minutes": 5,
+    "duration_seconds": 300,
     "created_at": "2024-01-15T09:30:00Z",
     "updated_at": "2024-01-15T09:35:00Z"
   }
@@ -507,9 +507,9 @@ Creates a new seizure record. You can provide both `start_time` and `end_time` i
   "client_name": "John Smith",
   "start_time": "2024-01-15T09:30:00Z",
   "end_time": "2024-01-15T09:35:00Z",
-  "duration_minutes": 5,
-  "created_at": "2024-01-15T09:30:00Z",
-  "updated_at": "2024-01-15T09:35:00Z"
+      "duration_seconds": 300,
+    "created_at": "2024-01-15T09:30:00Z",
+    "updated_at": "2024-01-15T09:35:00Z"
 }
 ```
 
@@ -530,7 +530,7 @@ Ends a seizure by setting the end time.
 {
   "message": "Seizure ended successfully",
   "end_time": "2024-01-15T09:35:00Z",
-  "duration_minutes": 5
+  "duration_seconds": 300
 }
 ```
 
@@ -916,7 +916,7 @@ Synchronizes data from the mobile app to the server.
   "client_name": "John Smith",
   "start_time": "2024-01-15T09:30:00Z",
   "end_time": "2024-01-15T09:35:00Z",
-  "duration_minutes": 5,
+  "duration_seconds": 300,
   "created_at": "2024-01-15T09:30:00Z",
   "updated_at": "2024-01-15T09:35:00Z"
 }
@@ -1270,7 +1270,7 @@ fetch('/appointments/api/staff/incidents/', {
 5. **Mobile Sync**: The sync endpoint allows for offline data synchronization.
 
 6. **Calculated Fields**: Some fields are calculated automatically:
-   - `duration_minutes` for appointments and seizures
+   - `duration_minutes` for appointments, `duration_seconds` for seizures
    - `total_daily_dose` for medications
    - `injury_count` and `has_serious_injuries` for body maps
    - `checklist_completion_percentage` for appointments

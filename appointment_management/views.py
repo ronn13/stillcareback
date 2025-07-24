@@ -132,22 +132,28 @@ class StaffAppointmentViewSet(viewsets.ModelViewSet):
         appointment = self.get_object()
         if not appointment.actual_start_time:
             return Response(
-                {'error': 'You cannot end this visit because it has not been started yet. Please start the visit first.'},
+                {'error': 'This visit cannot be ended because it has not been started yet. Please start the visit before attempting to end it.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
         if appointment.actual_end_time:
             return Response(
-                {'error': 'This visit has already been ended. You cannot end it again.'},
+                {'error': 'This visit has already been ended. You cannot end a visit more than once.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        appointment.actual_end_time = timezone.now()
-        appointment.status = 'completed'
-        appointment.save()
-        return Response({
-            'message': 'Visit ended successfully',
-            'actual_end_time': appointment.actual_end_time,
-            'duration_minutes': appointment.duration_minutes
-        })
+        try:
+            appointment.actual_end_time = timezone.now()
+            appointment.status = 'completed'
+            appointment.save()
+            return Response({
+                'message': 'Visit ended successfully.',
+                'actual_end_time': appointment.actual_end_time,
+                'duration_minutes': appointment.duration_minutes
+            })
+        except Exception as e:
+            return Response(
+                {'error': f'An unexpected error occurred while ending the visit: {str(e)}. Please contact support if this continues.'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
     @action(detail=True, methods=['post'])
     def update_checklist(self, request, pk=None):
@@ -316,7 +322,7 @@ class SeizureViewSet(viewsets.ModelViewSet):
         return Response({
             'message': 'Seizure ended successfully',
             'end_time': seizure.end_time,
-            'duration_minutes': seizure.duration_minutes
+            'duration_seconds': seizure.duration_seconds
         })
 
 

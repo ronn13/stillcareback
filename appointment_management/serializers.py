@@ -45,13 +45,13 @@ class AppointmentSerializer(serializers.ModelSerializer):
 class SeizureSerializer(serializers.ModelSerializer):
     appointment_title = serializers.ReadOnlyField(source='appointment.title')
     client_name = serializers.ReadOnlyField(source='appointment.client.full_name')
-    duration_minutes = serializers.ReadOnlyField()
+    duration_seconds = serializers.ReadOnlyField()
     
     class Meta:
         model = Seizure
         fields = [
             'id', 'appointment', 'appointment_title', 'client_name',
-            'start_time', 'end_time', 'duration_minutes',
+            'start_time', 'end_time', 'duration_seconds',
             'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']

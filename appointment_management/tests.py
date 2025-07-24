@@ -170,7 +170,7 @@ class VisitManagementAPITestCase(TestCase):
         data = response.json()
         self.assertIn('message', data)
         self.assertIn('end_time', data)
-        self.assertIn('duration_minutes', data)
+        self.assertIn('duration_seconds', data)
         self.assertEqual(data['message'], 'Seizure ended successfully')
 
     def test_incident_endpoints(self):

@@ -59,7 +59,7 @@ class SeizureAdmin(admin.ModelAdmin):
         'appointment_client',
         'start_time',
         'end_time',
-        'duration_minutes',
+        'duration_seconds',
         'appointment_title',
         'created_at'
     ]
@@ -73,13 +73,13 @@ class SeizureAdmin(admin.ModelAdmin):
         'appointment__client__last_name',
         'appointment__title'
     ]
-    readonly_fields = ['created_at', 'updated_at', 'duration_minutes']
+    readonly_fields = ['created_at', 'updated_at', 'duration_seconds']
     fieldsets = (
         ('Seizure Details', {
             'fields': ('appointment', 'start_time', 'end_time')
         }),
         ('Timestamps', {
-            'fields': ('created_at', 'updated_at', 'duration_minutes'),
+            'fields': ('created_at', 'updated_at', 'duration_seconds'),
             'classes': ('collapse',)
         }),
     )

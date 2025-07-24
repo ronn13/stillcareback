@@ -73,7 +73,7 @@ class Appointment(models.Model):
     @property
     def duration_minutes(self):
         """Calculate actual visit duration in minutes from appointment end time and visit end time"""
-        if self.actual_end_time and self.appointment.end_time:
+        if self.actual_end_time and self.end_time:
             # Use the earlier of the two end times
             end_time = min(self.actual_end_time, self.end_time)
             start_time = self.actual_start_time or self.start_time
@@ -118,11 +118,11 @@ class Seizure(models.Model):
         ordering = ['-start_time']
 
     @property
-    def duration_minutes(self):
-        """Calculate seizure duration in minutes"""
+    def duration_seconds(self):
+        """Calculate seizure duration in seconds"""
         if self.end_time and self.start_time:
             duration = self.end_time - self.start_time
-            return int(duration.total_seconds() / 60)
+            return int(duration.total_seconds())
         return None
 
     def __str__(self):
