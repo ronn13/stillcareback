@@ -190,6 +190,9 @@ CSRF_COOKIE_SAMESITE = 'Lax'
 SESSION_COOKIE_SAMESITE = 'Lax'
 CSRF_COOKIE_HTTPONLY = False  # Allow JavaScript access for AJAX requests
 
+# CSRF Trusted Origins - Required for Django 4.0+
+CSRF_TRUSTED_ORIGINS = os.environ.get('CSRF_TRUSTED_ORIGINS', 'https://web-production-83ebd.up.railway.app,https://*.up.railway.app,http://web-production-83ebd.up.railway.app,http://*.up.railway.app').split(',')
+
 # Security settings for production
 if not DEBUG:
     SECURE_BROWSER_XSS_FILTER = True
@@ -203,9 +206,6 @@ if not DEBUG:
     CSRF_COOKIE_SECURE = True
     X_FRAME_OPTIONS = 'DENY'
     
-    # CSRF settings for Railway deployment
-    CSRF_TRUSTED_ORIGINS = os.environ.get('CSRF_TRUSTED_ORIGINS', 'https://web-production-83ebd.up.railway.app,https://*.up.railway.app').split(',')
-    
     # Session settings for Railway
     SESSION_COOKIE_DOMAIN = None  # Let Django handle this automatically
     CSRF_COOKIE_DOMAIN = None     # Let Django handle this automatically
@@ -216,3 +216,18 @@ if not DEBUG:
 #     print("✓ Loaded local development settings")
 # except ImportError:
 #     print("ℹ No local_settings.py found, using production settings")
+
+# EMERGENCY CSRF FIX - REMOVE AFTER FIXING THE ISSUE
+# This ensures CSRF_TRUSTED_ORIGINS is always set regardless of environment variables
+if not CSRF_TRUSTED_ORIGINS or len(CSRF_TRUSTED_ORIGINS) == 0:
+    CSRF_TRUSTED_ORIGINS = [
+        'https://web-production-83ebd.up.railway.app',
+        'https://*.up.railway.app',
+        'http://web-production-83ebd.up.railway.app',
+        'http://*.up.railway.app',
+    ]
+
+# Temporarily disable secure cookies for Railway
+if not DEBUG:
+    CSRF_COOKIE_SECURE = False
+    SESSION_COOKIE_SECURE = False
