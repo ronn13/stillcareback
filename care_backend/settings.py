@@ -185,6 +185,11 @@ CORS_ALLOWED_ORIGINS = os.environ.get('CORS_ALLOWED_ORIGINS', 'http://localhost:
 
 CORS_ALLOW_CREDENTIALS = True
 
+# CSRF settings
+CSRF_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_HTTPONLY = False  # Allow JavaScript access for AJAX requests
+
 # Security settings for production
 if not DEBUG:
     SECURE_BROWSER_XSS_FILTER = True
@@ -192,10 +197,18 @@ if not DEBUG:
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_SECONDS = 31536000
     SECURE_REDIRECT_EXEMPT = []
-    SECURE_SSL_REDIRECT = True
+    # Only enable SSL redirect if we're sure HTTPS is working
+    # SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     X_FRAME_OPTIONS = 'DENY'
+    
+    # CSRF settings for Railway deployment
+    CSRF_TRUSTED_ORIGINS = os.environ.get('CSRF_TRUSTED_ORIGINS', 'https://web-production-83ebd.up.railway.app,https://*.up.railway.app').split(',')
+    
+    # Session settings for Railway
+    SESSION_COOKIE_DOMAIN = None  # Let Django handle this automatically
+    CSRF_COOKIE_DOMAIN = None     # Let Django handle this automatically
 
 # Import local settings for development
 # try:
